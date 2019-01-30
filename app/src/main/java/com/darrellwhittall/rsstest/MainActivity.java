@@ -1,0 +1,111 @@
+package com.darrellwhittall.rsstest;
+
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+import com.prof.rssparser.Article;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity {
+
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter adapter;
+    private MainViewModel viewModel;
+    private DrawerLayout drawerLayout;
+    private ProgressBar loadingIndicator;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+
+        viewModel.getArticleList().observe(this, new Observer<List<Article>>() {
+
+            /**
+             * When the dataset of articles changes in the viewmodel,
+             * Repopulate the recyclerView, show the recyclerView and hide the loadingIndicator
+             */
+            @Override
+            public void onChanged(@Nullable List<Article> articles) {
+                if(articles != null){
+                    adapter = new ArticleAdapter(articles);
+                    recyclerView.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+
+                    recyclerView.setVisibility(View.VISIBLE);
+                    loadingIndicator.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        // Store view member variables.
+        recyclerView = findViewById(R.id.rv_articles);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        loadingIndicator = findViewById(R.id.pb_loading_indicator);
+
+        // Setup RecyclerView
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new ArticleAdapter(new ArrayList<Article>());
+        recyclerView.setAdapter(adapter);
+
+       // Setup Navigation view
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        // set item as selected to persist highlight
+                        menuItem.setChecked(true);
+                        // close drawer when item is tapped
+                        drawerLayout.closeDrawers();
+
+                        switch (menuItem.getItemId()){
+                            case R.id.rock_paper_shotgun:
+                                loadNewFeed("http://feeds.feedburner.com/RockPaperShotgun");
+                                break;
+
+                            case R.id.android_central:
+                                loadNewFeed("http://feeds.androidcentral.com/androidcentral");
+                                break;
+
+                            case R.id.godot:
+                                loadNewFeed("https://godotengine.org/rss.xml");
+                                break;
+                        }
+
+                        return true;
+                    }
+                });
+
+
+        // Only load a default page if the viewModel hasn't tried to load anything yet
+        // This means it should be the first time the app has opened since it was last destroyed
+        if(viewModel.getState() == MainViewModel.State.BLANK)
+            loadNewFeed("http://feeds.feedburner.com/RockPaperShotgun");
+
+    }
+
+    /**
+     * Hides the feed, show the loading bar and tells the viewmodel to fetch a new feed
+     */
+    private void loadNewFeed(final String feedUrl){
+        recyclerView.setVisibility(View.INVISIBLE);
+        loadingIndicator.setVisibility(View.VISIBLE);
+        viewModel.fetchFeed(feedUrl);
+    }
+
+}
