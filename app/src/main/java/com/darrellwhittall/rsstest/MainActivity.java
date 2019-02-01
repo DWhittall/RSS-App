@@ -2,6 +2,7 @@ package com.darrellwhittall.rsstest;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -9,9 +10,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.ProgressBar;
+import com.darrellwhittall.rsstest.room.Feed;
 import com.prof.rssparser.Article;
 
 import java.util.ArrayList;
@@ -19,9 +23,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private ArticleListViewModel articleListViewModel;
+    private NavigationViewModel navigationViewModel;
+
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
-    private MainViewModel viewModel;
     private DrawerLayout drawerLayout;
     private ProgressBar loadingIndicator;
 
@@ -30,9 +36,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        // Store view member variables.
+        recyclerView = findViewById(R.id.rv_articles);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        loadingIndicator = findViewById(R.id.pb_loading_indicator);
 
-        viewModel.getArticleList().observe(this, new Observer<List<Article>>() {
+        // Link articleListViewModel to observer
+        articleListViewModel = ViewModelProviders.of(this).get(ArticleListViewModel.class);
+        articleListViewModel.getArticleList().observe(this, new Observer<List<Article>>() {
 
             /**
              * When the dataset of articles changes in the viewmodel,
@@ -51,50 +62,51 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Store view member variables.
-        recyclerView = findViewById(R.id.rv_articles);
-        drawerLayout = findViewById(R.id.drawer_layout);
-        loadingIndicator = findViewById(R.id.pb_loading_indicator);
-
         // Setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ArticleAdapter(new ArrayList<Article>());
         recyclerView.setAdapter(adapter);
 
-       // Setup Navigation view
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
+       // Setup Navigation View
+        navigationViewModel = ViewModelProviders.of(this).get(NavigationViewModel.class);
+        final NavigationView navigationView = findViewById(R.id.nav_view);
 
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        // set item as selected to persist highlight
-                        menuItem.setChecked(true);
-                        // close drawer when item is tapped
-                        drawerLayout.closeDrawers();
+        // Populate the menu whenever the data changes
+        navigationViewModel.getAllFeeds().observe(this, new Observer<List<Feed>>() {
+            @Override
+            public void onChanged(@Nullable List<Feed> feeds) {
+                Menu menu = navigationView.getMenu();
+                menu.clear();
 
-                        switch (menuItem.getItemId()){
-                            case R.id.rock_paper_shotgun:
-                                loadNewFeed("http://feeds.feedburner.com/RockPaperShotgun");
-                                break;
+                SubMenu subMenu = menu.addSubMenu("Feeds");
 
-                            case R.id.android_central:
-                                loadNewFeed("http://feeds.androidcentral.com/androidcentral");
-                                break;
+                for (int i = 0; i < feeds.size(); i++) {
+                    subMenu.add(i, Menu.FIRST + i, Menu.FIRST + i, feeds.get(i).getName());
+                }
 
-                            case R.id.godot:
-                                loadNewFeed("https://godotengine.org/rss.xml");
-                                break;
-                        }
+            }
+        });
 
-                        return true;
-                    }
-                });
+        // Setup "onClick" listener for navigation menu
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                menuItem.setChecked(true);
+                drawerLayout.closeDrawers();
 
+                int feedId = menuItem.getItemId() - 1;
 
-        // Only load a default page if the viewModel hasn't tried to load anything yet
+                List<Feed> feeds = navigationViewModel.getAllFeeds().getValue();
+                if(feeds != null && feeds.size() > feedId)
+                    loadNewFeed(feeds.get(feedId).getUrl());
+
+                return true;
+            }
+        });
+
+        // Only load a default page if the articleListViewModel hasn't tried to load anything yet
         // This means it should be the first time the app has opened since it was last destroyed
-        if(viewModel.getState() == MainViewModel.State.BLANK)
+        if(articleListViewModel.getState() == ArticleListViewModel.State.BLANK)
             loadNewFeed("http://feeds.feedburner.com/RockPaperShotgun");
 
     }
@@ -105,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
     private void loadNewFeed(final String feedUrl){
         recyclerView.setVisibility(View.INVISIBLE);
         loadingIndicator.setVisibility(View.VISIBLE);
-        viewModel.fetchFeed(feedUrl);
+        articleListViewModel.fetchFeed(feedUrl);
     }
 
 }

@@ -3,16 +3,4 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_height="match_parent"
         android:layout_width="wrap_content">
-
-    <group android:checkableBehavior="single">
-        <item
-                android:id="@+id/rock_paper_shotgun"
-                android:title="Rock Paper Shotgun" />
-        <item
-                android:id="@+id/android_central"
-                android:title="Android Central" />
-        <item
-                android:id="@+id/godot"
-                android:title="Godot Engine" />
-    </group>
 </menu>
