@@ -3,4 +3,7 @@
     <string name="image_description">default_image_description</string>
     <string name="open_in_browser">Open In Browser</string>
     <string name="share">share</string>
+    <string name="title">title</string>
+    <string name="url">url</string>
+    <string name="confirm">confirm</string>
 </resources>
