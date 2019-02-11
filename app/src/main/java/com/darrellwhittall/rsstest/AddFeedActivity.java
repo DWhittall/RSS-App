@@ -31,8 +31,8 @@ public class AddFeedActivity extends AppCompatActivity {
                 EditText feedTitleText = findViewById(R.id.et_feed_title);
                 EditText feedUrlText = findViewById(R.id.et_feed_url);
 
-                intent.putExtra("Name", feedTitleText.getText());
-                intent.putExtra("URL", feedUrlText.getText());
+                intent.putExtra("Name", feedTitleText.getText().toString());
+                intent.putExtra("URL", feedUrlText.getText().toString());
                 setResult(RESULT_OK, intent);
                 finish();
             }
