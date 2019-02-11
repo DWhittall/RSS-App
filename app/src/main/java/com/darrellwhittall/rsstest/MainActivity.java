@@ -12,12 +12,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import com.darrellwhittall.rsstest.room.Feed;
 import com.prof.rssparser.Article;
 
@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.Adapter adapter;
     private DrawerLayout drawerLayout;
     private ProgressBar loadingIndicator;
+    private TextView errorView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rv_articles);
         drawerLayout = findViewById(R.id.drawer_layout);
         loadingIndicator = findViewById(R.id.pb_loading_indicator);
+        errorView = findViewById(R.id.tv_error_message);
 
         // Link articleListViewModel to observer
         articleListViewModel = ViewModelProviders.of(this).get(ArticleListViewModel.class);
@@ -56,14 +58,31 @@ public class MainActivity extends AppCompatActivity {
              */
             @Override
             public void onChanged(@Nullable List<Article> articles) {
+                if(articles == null){
+                    recyclerView.setVisibility(View.GONE);
+                    loadingIndicator.setVisibility(View.GONE);
+                    errorView.setVisibility(View.VISIBLE);
+                    errorView.setText(R.string.feed_load_error);
+                }
+
                 if(articles != null){
                     adapter = new ArticleAdapter(articles);
                     recyclerView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
 
-                    recyclerView.setVisibility(View.VISIBLE);
-                    loadingIndicator.setVisibility(View.GONE);
+
+                    if(articles.size() > 0) {
+                        recyclerView.setVisibility(View.VISIBLE);
+                        loadingIndicator.setVisibility(View.GONE);
+                        errorView.setVisibility(View.GONE);
+                    } else {
+                        recyclerView.setVisibility(View.GONE);
+                        loadingIndicator.setVisibility(View.GONE);
+                        errorView.setVisibility(View.VISIBLE);
+                        errorView.setText(R.string.feed_empty_error);
+                    }
                 }
+
             }
         });
 

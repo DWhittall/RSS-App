@@ -6,4 +6,6 @@
     <string name="title">title</string>
     <string name="url">url</string>
     <string name="confirm">confirm</string>
+    <string name="feed_load_error">Error loading feed, please check the URL and try again.</string>
+    <string name="feed_empty_error">Feed seems empty! Please check the URL and try again.</string>
 </resources>

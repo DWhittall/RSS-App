@@ -58,7 +58,7 @@ public class ArticleListViewModel extends ViewModel {
 
             @Override
             public void onError(@NotNull Exception e) {
-                setArticleList(new ArrayList<Article>());
+                setArticleList(null);
                 Log.e("RSS", "Could not fetch rss feed", e);
 
                 currentState = State.FAILED;

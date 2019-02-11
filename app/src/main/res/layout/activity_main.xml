@@ -24,6 +24,14 @@
                 tools:listitem="@layout/article_list_row"
                 tools:itemCount="5"/>
 
+        <TextView
+                android:id="@+id/tv_error_message"
+                android:text="@string/feed_load_error"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
         <ProgressBar
                 android:id="@+id/pb_loading_indicator"
                 android:layout_height="42dp"
