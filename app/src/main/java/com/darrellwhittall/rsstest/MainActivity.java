@@ -12,11 +12,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import com.darrellwhittall.rsstest.room.Feed;
 import com.prof.rssparser.Article;
@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final int ADD_FEED_INTENT_ID = 0;
 
     private ArticleListViewModel articleListViewModel;
     private NavigationViewModel navigationViewModel;
@@ -108,12 +110,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Add onclick behaviour for the navigation bar fab
-        FloatingActionButton nav_fab = findViewById(R.id.fab_nav);
-        nav_fab.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton fab = findViewById(R.id.fab_nav);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, AddFeedActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, ADD_FEED_INTENT_ID);
             }
         });
 
@@ -127,10 +129,32 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Hides the feed, show the loading bar and tells the viewmodel to fetch a new feed
      */
-    private void loadNewFeed(final String feedUrl){
+    private void loadNewFeed(String feedUrl){
         recyclerView.setVisibility(View.INVISIBLE);
         loadingIndicator.setVisibility(View.VISIBLE);
         articleListViewModel.fetchFeed(feedUrl);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        /*
+          * Retrieving intent from the AddFeedActivity
+         */
+        if(requestCode == ADD_FEED_INTENT_ID && resultCode == RESULT_OK && data != null){
+            Bundle extras = data.getExtras();
+
+            if(extras != null) {
+                String name = extras.getString("Name");
+                String url = extras.getString("URL");
+
+                if(name != null && url != null) {
+                    navigationViewModel.insertFeed(new Feed(name, url));
+                }
+            }
+        }
+
+
+    }
 }
