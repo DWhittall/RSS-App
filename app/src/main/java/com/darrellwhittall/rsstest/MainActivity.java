@@ -102,8 +102,9 @@ public class MainActivity extends AppCompatActivity {
                 int feedId = menuItem.getItemId() - 1;
 
                 List<Feed> feeds = navigationViewModel.getAllFeeds().getValue();
-                if(feeds != null && feeds.size() > feedId)
+                if(feeds != null && feeds.size() > feedId) {
                     loadNewFeed(feeds.get(feedId).getUrl());
+                }
 
                 return true;
             }
@@ -121,8 +122,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Only load a default page if the articleListViewModel hasn't tried to load anything yet
         // This means it should be the first time the app has opened since it was last destroyed
-        if(articleListViewModel.getState() == ArticleListViewModel.State.BLANK)
+        if(articleListViewModel.getState() == ArticleListViewModel.State.BLANK) {
+            setTitle("Rock Paper Shotgun");
             loadNewFeed("http://feeds.feedburner.com/RockPaperShotgun");
+        }
 
     }
 
