@@ -11,11 +11,11 @@ public class Feed {
     @PrimaryKey
     @NonNull
     @ColumnInfo(name = "name")
-    private String name;
+    final private String name;
 
     @NonNull
     @ColumnInfo(name = "url")
-    private String url;
+    final private String url;
 
     public Feed(@NonNull String name, @NonNull String url) {
         this.name = name;

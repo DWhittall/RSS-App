@@ -8,7 +8,6 @@ import com.prof.rssparser.OnTaskCompleted;
 import com.prof.rssparser.Parser;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ArticleListViewModel extends ViewModel {
@@ -30,7 +29,7 @@ public class ArticleListViewModel extends ViewModel {
         return currentState;
     }
 
-    public MutableLiveData<List<Article>> getArticleList() {
+    MutableLiveData<List<Article>> getArticleList() {
         if (articleListLive == null) {
             articleListLive = new MutableLiveData<>();
         }
@@ -41,7 +40,7 @@ public class ArticleListViewModel extends ViewModel {
         this.articleListLive.postValue(articleList);
     }
 
-    public void fetchFeed(final String url){
+    void fetchFeed(final String url){
 
         currentState = State.LOADING;
 

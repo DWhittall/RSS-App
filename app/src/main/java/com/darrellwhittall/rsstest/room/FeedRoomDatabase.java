@@ -8,7 +8,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
-@Database(entities = {Feed.class}, version = 1)
+@Database(entities = {Feed.class}, version = 1, exportSchema = false)
 public abstract class FeedRoomDatabase extends RoomDatabase {
 
     public abstract FeedDao feedDao();
@@ -33,7 +33,7 @@ public abstract class FeedRoomDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    private static RoomDatabase.Callback roomDatabaseCallback =
+    private final static RoomDatabase.Callback roomDatabaseCallback =
             new RoomDatabase.Callback(){
                 @Override
                 public void onOpen (@NonNull SupportSQLiteDatabase db){

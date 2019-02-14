@@ -7,8 +7,8 @@ import android.os.AsyncTask;
 import java.util.List;
 
 public class FeedRepository {
-    private FeedDao feedDao;
-    private LiveData<List<Feed>> allFeeds;
+    final private FeedDao feedDao;
+    final private LiveData<List<Feed>> allFeeds;
 
     public FeedRepository(Application application) {
         FeedRoomDatabase db = FeedRoomDatabase.getDatabase(application);
@@ -25,7 +25,7 @@ public class FeedRepository {
     }
 
     private static class insertAsyncTask extends AsyncTask<Feed, Void, Void> {
-        private FeedDao asyncTaskDao;
+        private final FeedDao asyncTaskDao;
 
         insertAsyncTask(FeedDao dao) {
             asyncTaskDao = dao;
