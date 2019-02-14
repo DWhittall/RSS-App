@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.*;
 import com.prof.rssparser.Article;
 import com.squareup.picasso.Picasso;
@@ -23,7 +24,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         TextView authorView;
 
         // Dropdown Views
-        TextView previewView;
+        WebView previewView;
         Button openBrowserBtn;
         Button shareButton;
 
@@ -36,7 +37,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
             authorView = v.findViewById(R.id.tv_article_author);
             dateView = v.findViewById(R.id.tv_article_date);
 
-            previewView = v.findViewById(R.id.tv_article_preview);
+            previewView = v.findViewById(R.id.wv_article_preview);
             openBrowserBtn = v.findViewById(R.id.btn_open_browser);
             shareButton = v.findViewById(R.id.btn_share);
 
@@ -109,7 +110,8 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         holder.titleView.setText(currentArticle.getTitle());
         holder.authorView.setText(currentArticle.getAuthor());
         holder.dateView.setText(currentArticle.getPubDate().toString());
-        holder.previewView.setText(currentArticle.getDescription());
+
+        holder.previewView.loadData(currentArticle.getDescription(), null, null);
 
         Picasso.get()
                 .load(currentArticle.getImage())

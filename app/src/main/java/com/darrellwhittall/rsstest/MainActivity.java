@@ -28,8 +28,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int ADD_FEED_INTENT_ID = 0;
 
-    private ArticleListViewModel articleListViewModel;
-    private NavigationViewModel navigationViewModel;
+    private ArticleListViewModel articleViewModel;
+    private NavigationViewModel navViewModel;
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
@@ -37,69 +37,102 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar loadingIndicator;
     private TextView errorView;
 
+    private FloatingActionButton navFab;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
-        // Store view member variables.
+        //Get viewModels
+        articleViewModel = ViewModelProviders.of(this).get(ArticleListViewModel.class);
+        navViewModel = ViewModelProviders.of(this).get(NavigationViewModel.class);
+
+        // Get views
         recyclerView = findViewById(R.id.rv_articles);
         drawerLayout = findViewById(R.id.drawer_layout);
         loadingIndicator = findViewById(R.id.pb_loading_indicator);
         errorView = findViewById(R.id.tv_error_message);
+        navFab = findViewById(R.id.nav_fab);
 
-        // Link articleListViewModel to observer
-        articleListViewModel = ViewModelProviders.of(this).get(ArticleListViewModel.class);
-        articleListViewModel.getArticleList().observe(this, new Observer<List<Article>>() {
+        // Setup Views
+        createArticlesList();
+        createNavigationView();
 
-            /**
-             * When the dataset of articles changes in the viewmodel,
-             * Repopulate the recyclerView, show the recyclerView and hide the loadingIndicator
-             */
-            @Override
-            public void onChanged(@Nullable List<Article> articles) {
-                if(articles == null){
-                    recyclerView.setVisibility(View.GONE);
-                    loadingIndicator.setVisibility(View.GONE);
-                    errorView.setVisibility(View.VISIBLE);
-                    errorView.setText(R.string.feed_load_error);
-                }
-
-                if(articles != null){
-                    adapter = new ArticleAdapter(articles);
-                    recyclerView.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
+        // Only load a default page if the articleViewModel hasn't tried to load anything yet
+        // This means it should be the first time the app has opened since it was last destroyed
+        if(articleViewModel.getState() == ArticleListViewModel.State.BLANK) {
+            setTitle("Rock Paper Shotgun");
+            loadNewFeed("http://feeds.feedburner.com/RockPaperShotgun");
+        }
+    }
 
 
-                    if(articles.size() > 0) {
-                        recyclerView.setVisibility(View.VISIBLE);
-                        loadingIndicator.setVisibility(View.GONE);
-                        errorView.setVisibility(View.GONE);
-                    } else {
-                        recyclerView.setVisibility(View.GONE);
-                        loadingIndicator.setVisibility(View.GONE);
-                        errorView.setVisibility(View.VISIBLE);
-                        errorView.setText(R.string.feed_empty_error);
-                    }
-                }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+        if(requestCode == ADD_FEED_INTENT_ID && resultCode == RESULT_OK && data != null){
+
+            String name = data.getExtras().getString("Name");
+            String url = data.getExtras().getString("URL");
+
+            if(name != null && url != null) {
+                navViewModel.insertFeed(new Feed(name, url));
             }
-        });
 
-        // Setup RecyclerView
+        }
+    }
+
+    /**
+     * RECYCLER VIEW SETUP
+     */
+    private void createArticlesList() {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ArticleAdapter(new ArrayList<Article>());
         recyclerView.setAdapter(adapter);
 
-       // Setup Navigation View
-        navigationViewModel = ViewModelProviders.of(this).get(NavigationViewModel.class);
-        final NavigationView navigationView = findViewById(R.id.nav_view);
+        articleViewModel.getArticleList().observe(this, new Observer<List<Article>>() {
+            @Override
+            public void onChanged(@Nullable List<Article> articles) {
 
-        // Populate the menu whenever the data changes
-        navigationViewModel.getAllFeeds().observe(this, new Observer<List<Feed>>() {
+                if(articles == null){
+                    showErrorMessage(R.string.feed_load_error);
+                    return;
+                }
+
+                if(articles.size() == 0) {
+                    showErrorMessage(R.string.feed_empty_error);
+                    return;
+                }
+
+                showArticlesList();
+                adapter = new ArticleAdapter(articles);
+                recyclerView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+
+            }
+        });
+    }
+
+
+    /**
+     * NAVIGATION VIEW SETUP
+     */
+    private void createNavigationView() {
+
+        final NavigationView navView = findViewById(R.id.nav_view);
+
+        navViewModel.getAllFeeds().observe(this, new Observer<List<Feed>>() {
             @Override
             public void onChanged(@Nullable List<Feed> feeds) {
-                Menu menu = navigationView.getMenu();
+
+                if(feeds == null){
+                    return;
+                }
+
+                Menu menu = navView.getMenu();
                 menu.clear();
 
                 SubMenu subMenu = menu.addSubMenu("Feeds");
@@ -111,8 +144,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Setup "onClick" listener for navigation menu
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 menuItem.setChecked(true);
@@ -120,8 +152,9 @@ public class MainActivity extends AppCompatActivity {
 
                 int feedId = menuItem.getItemId() - 1;
 
-                List<Feed> feeds = navigationViewModel.getAllFeeds().getValue();
+                List<Feed> feeds = navViewModel.getAllFeeds().getValue();
                 if(feeds != null && feeds.size() > feedId) {
+                    setTitle(feeds.get(feedId).getName());
                     loadNewFeed(feeds.get(feedId).getUrl());
                 }
 
@@ -129,54 +162,41 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Add onclick behaviour for the navigation bar fab
-        FloatingActionButton fab = findViewById(R.id.fab_nav);
-        fab.setOnClickListener(new View.OnClickListener() {
+        navFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, AddFeedActivity.class);
                 startActivityForResult(intent, ADD_FEED_INTENT_ID);
             }
         });
-
-        // Only load a default page if the articleListViewModel hasn't tried to load anything yet
-        // This means it should be the first time the app has opened since it was last destroyed
-        if(articleListViewModel.getState() == ArticleListViewModel.State.BLANK) {
-            setTitle("Rock Paper Shotgun");
-            loadNewFeed("http://feeds.feedburner.com/RockPaperShotgun");
-        }
-
     }
 
     /**
-     * Hides the feed, show the loading bar and tells the viewmodel to fetch a new feed
+     *  Hides all relevant views and displays the error message
+     */
+    private void showErrorMessage(int errorMsgResource){
+        recyclerView.setVisibility(View.GONE);
+        loadingIndicator.setVisibility(View.GONE);
+        errorView.setVisibility(View.VISIBLE);
+        errorView.setText(errorMsgResource);
+    }
+
+    /**
+     *  Hides all overlapping views and displays the recycler views
+     */
+    private void showArticlesList(){
+        recyclerView.setVisibility(View.VISIBLE);
+        loadingIndicator.setVisibility(View.GONE);
+        errorView.setVisibility(View.GONE);
+    }
+
+    /**
+     * Hides the feed, show the loading bar and tells the viewModel to fetch a new feed
      */
     private void loadNewFeed(String feedUrl){
         recyclerView.setVisibility(View.INVISIBLE);
         loadingIndicator.setVisibility(View.VISIBLE);
-        articleListViewModel.fetchFeed(feedUrl);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        /*
-          * Retrieving intent from the AddFeedActivity
-         */
-        if(requestCode == ADD_FEED_INTENT_ID && resultCode == RESULT_OK && data != null){
-            Bundle extras = data.getExtras();
-
-            if(extras != null) {
-                String name = extras.getString("Name");
-                String url = extras.getString("URL");
-
-                if(name != null && url != null) {
-                    navigationViewModel.insertFeed(new Feed(name, url));
-                }
-            }
-        }
-
-
+        errorView.setVisibility(View.GONE);
+        articleViewModel.fetchFeed(feedUrl);
     }
 }
