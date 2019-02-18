@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_height="50dp"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent">
+
+    <ImageView
+            android:id="@+id/nav_list_item_image"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+
+            android:src="@mipmap/ic_launcher"
+            android:contentDescription="@string/image_description"/>
+
+    <TextView
+            android:id="@+id/nav_list_item_title"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginLeft="5dp"
+
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:gravity="center_vertical"
+
+            tools:text="Feed Title goes here!"/>
+
+    <ImageButton
+            android:id="@+id/btn_nav_list_item_edit"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
+            android:src="@drawable/ic_edit_black"
+            android:background="?selectableItemBackground"
+            android:contentDescription="@string/image_description"
+            android:visibility="gone"/>
+
+</LinearLayout>

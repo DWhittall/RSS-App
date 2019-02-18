@@ -65,12 +65,7 @@ public class ArticleListViewModel extends ViewModel {
         });
 
         // Todo: Keep a thread and kill it if another one is started
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                parser.execute(url);
-            }
-        }).start();
+        new Thread(() -> parser.execute(url)).start();
     }
 
 }

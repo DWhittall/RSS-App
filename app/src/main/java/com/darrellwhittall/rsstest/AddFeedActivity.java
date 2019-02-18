@@ -23,19 +23,16 @@ public class AddFeedActivity extends AppCompatActivity {
         }
 
         Button confirmButton = findViewById(R.id.btn_confirm);
-        confirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
+        confirmButton.setOnClickListener(v -> {
+            Intent intent = new Intent();
 
-                EditText feedTitleText = findViewById(R.id.et_feed_title);
-                EditText feedUrlText = findViewById(R.id.et_feed_url);
+            EditText feedTitleText = findViewById(R.id.et_feed_title);
+            EditText feedUrlText = findViewById(R.id.et_feed_url);
 
-                intent.putExtra("Name", feedTitleText.getText().toString());
-                intent.putExtra("URL", feedUrlText.getText().toString());
-                setResult(RESULT_OK, intent);
-                finish();
-            }
+            intent.putExtra("Name", feedTitleText.getText().toString());
+            intent.putExtra("URL", feedUrlText.getText().toString());
+            setResult(RESULT_OK, intent);
+            finish();
         });
     }
 

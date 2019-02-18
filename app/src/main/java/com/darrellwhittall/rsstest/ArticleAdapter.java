@@ -29,19 +29,19 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         private final Button shareButton;
 
         // TODO: Use data binding
-        ArticleViewHolder(View v) {
-            super(v);
+        ArticleViewHolder(@NonNull View view) {
+            super(view);
 
-            imageView = v.findViewById(R.id.iv_article_image);
-            titleView = v.findViewById(R.id.tv_article_title);
-            authorView = v.findViewById(R.id.tv_article_author);
-            dateView = v.findViewById(R.id.tv_article_date);
+            imageView = view.findViewById(R.id.iv_article_image);
+            titleView = view.findViewById(R.id.tv_article_title);
+            authorView = view.findViewById(R.id.tv_article_author);
+            dateView = view.findViewById(R.id.tv_article_date);
 
-            previewView = v.findViewById(R.id.wv_article_preview);
-            openBrowserBtn = v.findViewById(R.id.btn_open_browser);
-            shareButton = v.findViewById(R.id.btn_share);
+            previewView = view.findViewById(R.id.wv_article_preview);
+            openBrowserBtn = view.findViewById(R.id.btn_open_browser);
+            shareButton = view.findViewById(R.id.btn_share);
 
-            v.setOnClickListener(this);
+            view.setOnClickListener(this);
         }
 
         @Override
@@ -81,6 +81,12 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         this.dataset = dataset;
     }
 
+    public void updateData(List<Article> newData) {
+        dataset.clear();
+        dataset.addAll(newData);
+        notifyDataSetChanged();
+    }
+
     /**
      * Called when ViewHolders are created to fill a RecyclerView.
      *
@@ -91,7 +97,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
     public ArticleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // create a new view
         ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.article_list_row, parent, false);
+                .inflate(R.layout.article_list_item, parent, false);
 
         return new ArticleViewHolder(v);
     }
