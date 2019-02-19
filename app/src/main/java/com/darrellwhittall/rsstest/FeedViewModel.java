@@ -12,12 +12,12 @@ import java.util.List;
  * View model for the navigation drawer of the app,
  * handles fetching of subscribed feeds from the FeedRepository
  */
-class NavigationViewModel extends AndroidViewModel {
+class FeedViewModel extends AndroidViewModel {
 
     private final FeedRepository feedRepository;
     private final LiveData<List<Feed>> feedListLive;
 
-    public NavigationViewModel(Application application){
+    public FeedViewModel(Application application){
         super(application);
         feedRepository = new FeedRepository(application);
         feedListLive = feedRepository.getAllFeeds();

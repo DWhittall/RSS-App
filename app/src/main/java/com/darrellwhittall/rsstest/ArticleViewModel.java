@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class ArticleListViewModel extends ViewModel {
+public class ArticleViewModel extends ViewModel {
 
     // TODO: Decide if this is good practice,
     //  probably remove it and load last opened feed instead

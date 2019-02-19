@@ -1,34 +1,33 @@
 package com.darrellwhittall.rsstest;
 
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.MotionEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
+import android.support.v7.widget.Toolbar;
 import com.darrellwhittall.rsstest.room.Feed;
-import com.prof.rssparser.Article;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int ADD_FEED_INTENT_ID = 0;
 
-    private ArticleListViewModel articleViewModel;
-    private NavigationViewModel navViewModel;
+    private ArticleViewModel articleViewModel;
+    private FeedViewModel navViewModel;
 
+    private DrawerLayout drawerLayout;
     private RecyclerView articlesView;
     private ProgressBar loadingIndicator;
     private TextView errorView;
@@ -39,9 +38,19 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionbar = getSupportActionBar();
+        if(actionbar != null) {
+            actionbar.setDisplayHomeAsUpEnabled(true);
+            actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        }
+
+
         //Get viewModels
-        articleViewModel = ViewModelProviders.of(this).get(ArticleListViewModel.class);
-        navViewModel = ViewModelProviders.of(this).get(NavigationViewModel.class);
+        articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel.class);
+        navViewModel = ViewModelProviders.of(this).get(FeedViewModel.class);
 
         // Get views
         articlesView = findViewById(R.id.rv_articles);
@@ -71,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Navigation View Setup
         RecyclerView feedsView = findViewById(R.id.rv_nav_feeds);
-        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        drawerLayout = findViewById(R.id.drawer_layout);
         feedsView.setLayoutManager(new LinearLayoutManager(this));
 
         FeedAdapter feedAdapter = new FeedAdapter(new ArrayList<>(), feed -> {
@@ -90,12 +99,22 @@ public class MainActivity extends AppCompatActivity {
 
         // Only load a default page if the articleViewModel hasn't tried to load anything yet
         // This means it should be the first time the app has opened since it was last destroyed
-        if(articleViewModel.getState() == ArticleListViewModel.State.BLANK) {
+        if(articleViewModel.getState() == ArticleViewModel.State.BLANK) {
             loadNewFeed(new Feed(
                     "Rock Paper Shotgun",
                     "http://feeds.feedburner.com/RockPaperShotgun")
             );
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            drawerLayout.openDrawer(GravityCompat.START);
+            return true;
+        }
+        
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
