@@ -2,7 +2,6 @@ package com.darrellwhittall.rsstest;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -11,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -22,10 +22,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int ADD_FEED_INTENT_ID = 0;
-
     private ArticleViewModel articleViewModel;
-    private FeedViewModel navViewModel;
 
     private DrawerLayout drawerLayout;
     private RecyclerView articlesView;
@@ -38,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
@@ -47,16 +43,13 @@ public class MainActivity extends AppCompatActivity {
             actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
         }
 
-
-        //Get viewModels
+        //Get viewModels and views
         articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel.class);
-        navViewModel = ViewModelProviders.of(this).get(FeedViewModel.class);
+        FeedViewModel feedViewModel = ViewModelProviders.of(this).get(FeedViewModel.class);
 
-        // Get views
         articlesView = findViewById(R.id.rv_articles);
         loadingIndicator = findViewById(R.id.pb_loading_indicator);
         errorView = findViewById(R.id.tv_error_message);
-
 
         // Article RecyclerView Setup
         articlesView.setLayoutManager(new LinearLayoutManager(this));
@@ -89,13 +82,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         feedsView.setAdapter(feedAdapter);
-        navViewModel.getAllFeeds().observe(this, feedAdapter::updateData);
+        feedViewModel.getAllFeeds().observe(this, feedAdapter::updateData);
 
         FloatingActionButton navFab = findViewById(R.id.nav_fab);
-        navFab.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, AddFeedActivity.class);
-            startActivityForResult(intent, ADD_FEED_INTENT_ID);
-        });
+        navFab.setOnClickListener(v ->
+                startActivity(new Intent(MainActivity.this, AddFeedActivity.class))
+        );
 
         // Only load a default page if the articleViewModel hasn't tried to load anything yet
         // This means it should be the first time the app has opened since it was last destroyed
@@ -108,33 +100,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.action_bar_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         if (item.getItemId() == android.R.id.home) {
             drawerLayout.openDrawer(GravityCompat.START);
             return true;
         }
-        
+
+        if (item.getItemId() == R.id.action_edit){
+            Intent intent = new Intent(MainActivity.this, AddFeedActivity.class);
+
+            Feed currentFeed = articleViewModel.getCurrentFeed();
+            intent.putExtra("FeedTitle", currentFeed.getName());
+            intent.putExtra("FeedURL", currentFeed.getUrl());
+
+            startActivity(intent);
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if(data == null || data.getExtras() == null){
-            return;
-        }
-
-        if(requestCode == ADD_FEED_INTENT_ID && resultCode == RESULT_OK ){
-
-            String name = data.getExtras().getString("Name");
-            String url = data.getExtras().getString("URL");
-
-            if(name != null && url != null) {
-                navViewModel.insertFeed(new Feed(name, url));
-            }
-
-        }
     }
 
     /**
@@ -165,6 +155,6 @@ public class MainActivity extends AppCompatActivity {
         errorView.setVisibility(View.GONE);
 
         setTitle(feed.getName());
-        articleViewModel.fetchFeed(feed.getUrl());
+        articleViewModel.fetchFeed(feed);
     }
 }

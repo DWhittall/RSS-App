@@ -3,6 +3,7 @@ package com.darrellwhittall.rsstest;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.util.Log;
+import com.darrellwhittall.rsstest.room.Feed;
 import com.prof.rssparser.Article;
 import com.prof.rssparser.OnTaskCompleted;
 import com.prof.rssparser.Parser;
@@ -11,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class ArticleViewModel extends ViewModel {
+
+    private Feed currentFeed;
 
     // TODO: Decide if this is good practice,
     //  probably remove it and load last opened feed instead
@@ -29,6 +32,8 @@ public class ArticleViewModel extends ViewModel {
         return currentState;
     }
 
+    public Feed getCurrentFeed() { return currentFeed; }
+
     MutableLiveData<List<Article>> getArticleList() {
         if (articleListLive == null) {
             articleListLive = new MutableLiveData<>();
@@ -40,8 +45,9 @@ public class ArticleViewModel extends ViewModel {
         this.articleListLive.postValue(articleList);
     }
 
-    void fetchFeed(final String url){
+    void fetchFeed(final Feed feed){
 
+        currentFeed = feed;
         currentState = State.LOADING;
 
         final Parser parser = new Parser();
@@ -65,7 +71,7 @@ public class ArticleViewModel extends ViewModel {
         });
 
         // Todo: Keep a thread and kill it if another one is started
-        new Thread(() -> parser.execute(url)).start();
+        new Thread(() -> parser.execute(feed.getUrl())).start();
     }
 
 }

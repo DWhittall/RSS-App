@@ -8,4 +8,9 @@
     <string name="confirm">confirm</string>
     <string name="feed_load_error">Error loading feed, please check the URL and try again.</string>
     <string name="feed_empty_error">Feed seems empty! Please check the URL and try again.</string>
+    <string name="action_edit">Edit Activity</string>
+    <string name="action_settings">Settings</string>
+    <string name="add_feed">Add Feed</string>
+    <string name="edit_feed">Edit Feed</string>
+    <string name="delete">delete</string>
 </resources>
