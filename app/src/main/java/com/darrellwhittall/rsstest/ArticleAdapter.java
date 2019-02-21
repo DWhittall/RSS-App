@@ -2,6 +2,7 @@ package com.darrellwhittall.rsstest;
 
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,19 +17,13 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
 
     private final List<Article> dataset;
 
-    public static class ArticleViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ArticleViewHolder extends RecyclerView.ViewHolder {
 
         private final ImageView imageView;
         private final TextView titleView;
         private final TextView dateView;
         private final TextView authorView;
 
-        // Dropdown Views
-        private final TextView previewView;
-        private final Button openBrowserBtn;
-        private final Button shareButton;
-
-        // TODO: Use data binding
         ArticleViewHolder(@NonNull View view) {
             super(view);
 
@@ -36,44 +31,6 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
             titleView = view.findViewById(R.id.tv_article_title);
             authorView = view.findViewById(R.id.tv_article_author);
             dateView = view.findViewById(R.id.tv_article_date);
-
-            previewView = view.findViewById(R.id.wv_article_preview);
-            openBrowserBtn = view.findViewById(R.id.btn_open_browser);
-            shareButton = view.findViewById(R.id.btn_share);
-
-            view.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View view) {
-
-            if(previewView.getVisibility() != View.VISIBLE){
-                showPreview(view);
-            } else {
-                hidePreview(view);
-            }
-
-        }
-
-        void showPreview(View view){
-
-            view.setBackgroundColor(view.getResources()
-                    .getColor(R.color.colorBackgroundTint, view.getContext().getTheme())
-            );
-
-            previewView.setVisibility(View.VISIBLE);
-            openBrowserBtn.setVisibility(View.VISIBLE);
-            shareButton.setVisibility(View.VISIBLE);
-
-        }
-
-        void hidePreview(View view){
-
-            view.setBackground(null);
-
-            previewView.setVisibility(View.GONE);
-            openBrowserBtn.setVisibility(View.GONE);
-            shareButton.setVisibility(View.GONE);
         }
     }
 
@@ -81,7 +38,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         this.dataset = dataset;
     }
 
-    public void updateData(List<Article> newData) {
+    void updateData(List<Article> newData) {
         dataset.clear();
         dataset.addAll(newData);
         notifyDataSetChanged();
@@ -96,7 +53,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
     @NonNull
     public ArticleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // create a new view
-        ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext())
+        CardView v = (CardView) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.article_list_item, parent, false);
 
         return new ArticleViewHolder(v);
@@ -120,8 +77,6 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         if(currentArticle.getPubDate() != null) {
             holder.dateView.setText(currentArticle.getPubDate().toString());
         }
-
-        holder.previewView.setText(currentArticle.getDescription());
 
         Picasso.get()
                 .load(currentArticle.getImage())
