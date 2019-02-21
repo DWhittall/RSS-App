@@ -17,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
 import com.darrellwhittall.rsstest.room.Feed;
+import com.prof.rssparser.Article;
 
 import java.util.ArrayList;
 
@@ -53,7 +54,20 @@ public class MainActivity extends AppCompatActivity {
 
         // Article RecyclerView Setup
         articlesView.setLayoutManager(new LinearLayoutManager(this));
-        ArticleAdapter articleAdapter = new ArticleAdapter(new ArrayList<>());
+        ArticleAdapter articleAdapter = new ArticleAdapter(new ArrayList<>(), article -> {
+            Intent intent = new Intent(MainActivity.this, ArticleActivity.class);
+            intent.putExtra("Title", article.getTitle());
+            intent.putExtra("Author", article.getAuthor());
+
+            if(article.getPubDate() != null) {
+                intent.putExtra("Date", article.getPubDate().toString());
+            }
+
+            intent.putExtra("Image", article.getImage());
+            intent.putExtra("Content", article.getContent());
+
+            startActivity(intent);
+        });
         articlesView.setAdapter(articleAdapter);
 
         articleViewModel.getArticleList().observe(this, articles -> {

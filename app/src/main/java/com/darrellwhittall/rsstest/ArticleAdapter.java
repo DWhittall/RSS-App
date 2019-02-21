@@ -17,25 +17,11 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
 
     private final List<Article> dataset;
 
-    public static class ArticleViewHolder extends RecyclerView.ViewHolder {
+    private final OnArticleClickListener onClickListener;
 
-        private final ImageView imageView;
-        private final TextView titleView;
-        private final TextView dateView;
-        private final TextView authorView;
-
-        ArticleViewHolder(@NonNull View view) {
-            super(view);
-
-            imageView = view.findViewById(R.id.iv_article_image);
-            titleView = view.findViewById(R.id.tv_article_title);
-            authorView = view.findViewById(R.id.tv_article_author);
-            dateView = view.findViewById(R.id.tv_article_date);
-        }
-    }
-
-    ArticleAdapter(List<Article> dataset) {
+    ArticleAdapter(List<Article> dataset, OnArticleClickListener onClickListener) {
         this.dataset = dataset;
+        this.onClickListener = onClickListener;
     }
 
     void updateData(List<Article> newData) {
@@ -82,10 +68,39 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
                 .load(currentArticle.getImage())
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(holder.imageView);
+
+        holder.itemView.setOnClickListener(view ->
+                onClickListener.onArticleClick(dataset.get(position)));
     }
 
     @Override
     public int getItemCount() {
         return dataset.size();
     }
+
+    public static class ArticleViewHolder extends RecyclerView.ViewHolder {
+
+        private final ImageView imageView;
+        private final TextView titleView;
+        private final TextView dateView;
+        private final TextView authorView;
+
+        ArticleViewHolder(@NonNull View view) {
+            super(view);
+
+            imageView = view.findViewById(R.id.iv_article_image);
+            titleView = view.findViewById(R.id.tv_article_title);
+            authorView = view.findViewById(R.id.tv_article_author);
+            dateView = view.findViewById(R.id.tv_article_date);
+        }
+    }
+
+    interface OnArticleClickListener{
+        void onArticleClick(Article article);
+    }
+
 }
+
+
+
+

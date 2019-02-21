@@ -32,7 +32,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     @Override
     public void onBindViewHolder(@NonNull FeedViewHolder holder, int position) {
         holder.titleView.setText(dataset.get(position).getName());
-        holder.itemView.setOnClickListener(view -> onClickListener.onFeedClick(dataset.get(position)));
+        holder.itemView.setOnClickListener(view ->
+                onClickListener.onFeedClick(dataset.get(position)));
     }
 
     @Override
